@@ -30,7 +30,7 @@ jobs:
     # 4. Point Maven to your JFrog target repositories
     - name: Configure Maven Repositories
       run: |
-        jf mvnc --server-id-resolve=test-npm-remote --repo-resolve-releases=maven-releases --repo-resolve-snapshots=maven-snapshots --server-id-deploy=main --repo-deploy-releases=maven-releases --repo-deploy-snapshots=maven-snapshots
+        jf mvnc --repo-resolve-releases=test-npm-remote --repo-resolve-snapshots=maven-snapshots --server-id-deploy=main --repo-deploy-releases=maven-releases --repo-deploy-snapshots=maven-snapshots
 
     # 5. Compile, run tests, package, and upload artifacts to JFrog
     - name: Build and Publish Package
