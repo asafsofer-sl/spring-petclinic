@@ -32,6 +32,8 @@ jobs:
       run: |
         jf mvnc --repo-resolve-releases=maven-remote --repo-resolve-snapshots=maven-snapshots --repo-deploy-releases=maven-releases --repo-deploy-snapshots=maven-snapshots
     # 5. Compile, run tests, package, and upload artifacts to JFrog
+    - name: Configure JFrog CLI with username
+      run: jf config add ci-server --url=${{ vars.JF_URL }} --access-token=${{ secrets.JF_ACCESS_TOKEN }} --user=asafs@jfrog.com --interactive=false
     - name: Build and Publish Package
       run: jf mvn clean install
 
