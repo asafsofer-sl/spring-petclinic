@@ -27,6 +27,10 @@ jobs:
         JF_URL: ${{ secrets.JF_URL }}
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
+   # 3.1. Configure JFrog CLI with username
+    - name: Configure JFrog CLI with username
+     run: jf config add ci-server --url=${{ secrets.JF_URL }} --access-token=${{ secrets.JF_ACCESS_TOKEN }} --user=asafs@jfrog.com --interactive=false
+
     # 4. Point Maven to your JFrog target repositories
     - name: Configure Maven Repositories
       run: |
