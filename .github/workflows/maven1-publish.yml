@@ -44,3 +44,15 @@ jobs:
           jf rt build-collect-env
           jf rt build-add-git
           jf rt build-publish --server-id=ci-server
+
+      # 7. Build Docker image
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.JF_URL }}/docker-local/spring-petclinic:${{ github.sha }} .
+
+      # 8. Login to JFrog Docker registry
+      - name: Docker Login to JFrog
+        run: echo ${{ secrets.JF_ACCESS_TOKEN }} | docker login ${{ secrets.JF_URL }} -u asafs@jfrog.com --password-stdin
+
+      # 9. Push Docker image to JFrog
+      - name: Push Docker Image
+        run: docker push ${{ secrets.JF_URL }}/docker-local/spring-petclinic:${{ github.sha }}
