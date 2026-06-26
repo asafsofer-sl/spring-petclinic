@@ -23,35 +23,23 @@ jobs:
         env:
           JF_URL: ${{ secrets.JF_URL }}
 
-      # 3.1 Configure JFrog CLI with access token (no --user)
-      - name: Configure JFrog CLI with access token
+      # 3.1. Configure JFrog CLI with username + token, and set as default server
+      - name: Configure JFrog CLI with username
         run: |
-          jf config add ci-server --url="${{ secrets.JF_URL }}" --access-token="${{ secrets.JF_ACCESS_TOKEN }}" --interactive=false
+          jf config add ci-server --url=${{ secrets.JF_URL }} --access-token=${{ secrets.JF_ACCESS_TOKEN }} --user=asafs@jfrog.com --interactive=false
           jf config use ci-server
-          # Verify connectivity and server config (fails fast and gives clearer error)
-          jf rt ping --server-id=ci-server
-          jf rt config show --server-id=ci-server
 
       # 4. Point Maven to your JFrog target repositories
       - name: Configure Maven Repositories
         run: |
-          jf mvnc --server-id-resolve=ci-server --server-id-deploy=ci-server \
-            --repo-resolve-releases=maven-remote \
-            --repo-resolve-snapshots=maven-snapshots \
-            --repo-deploy-releases=maven-releases \
-            --repo-deploy-snapshots=maven-snapshots
+          jf mvnc --server-id-resolve=ci-server --server-id-deploy=ci-server --repo-resolve-releases=maven-remote --repo-resolve-snapshots=maven-snapshots --repo-deploy-releases=maven-releases --repo-deploy-snapshots=maven-snapshots
 
       # 5. Compile, run tests, package, and upload artifacts to JFrog
-      - name: Build (Maven)
-        env:
-          # Keep at INFO in normal runs; set to DEBUG for troubleshooting
-          JFROG_CLI_LOG_LEVEL: INFO
+      - name: Build and Publish Package
         run: jf mvn clean install
 
       # 6. Publish Build Info metadata back to the JFrog Platform
-      # Only publish build-info from the main branch and when a token is present.
       - name: Publish Build Info
-        if: github.ref == 'refs/heads/main' && secrets.JF_ACCESS_TOKEN != ''
         run: |
           jf rt build-collect-env
           jf rt build-add-git
@@ -63,20 +51,8 @@ jobs:
 
       # 8. Login to JFrog Docker registry
       - name: Docker Login to JFrog
-        if: secrets.JF_ACCESS_TOKEN != ''
-        run: |
-          echo "${{ secrets.JF_ACCESS_TOKEN }}" | docker login ${{ secrets.JF_URL }} -u asafs@jfrog.com --password-stdin
+        run: echo ${{ secrets.JF_ACCESS_TOKEN }} | docker login ${{ secrets.JF_URL }} -u asafs@jfrog.com --password-stdin
 
       # 9. Push Docker image to JFrog
       - name: Push Docker Image
-        if: github.ref == 'refs/heads/main' && secrets.JF_ACCESS_TOKEN != ''
         run: docker push ${{ secrets.JF_URL }}/docker-local/spring-petclinic:${{ github.sha }}
-
-      # Optional: diagnostic debug step (uncomment when troubleshooting)
-      # - name: Debug: JFrog CLI and HTTP traces
-      #   if: github.ref == 'refs/heads/main' && secrets.JF_ACCESS_TOKEN != ''
-      #   env:
-      #     JFROG_CLI_LOG_LEVEL: DEBUG
-      #   run: |
-      #     jf rt ping --server-id=ci-server
-      #     jf rt curl /api/system/version --server-id=ci-server
