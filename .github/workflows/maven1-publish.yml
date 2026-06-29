@@ -64,5 +64,5 @@ jobs:
       #  run: echo ${{ secrets.JF_ACCESS_TOKEN }} | docker login ${{ secrets.JF_URL }} -u asafs@jfrog.com --password-stdin
 
       # 9. Push Docker image to JFrog
-      - name: Push Docker Image
-        run: docker push ${{ secrets.JF_URL }}/docker-local/spring-petclinic:${{ github.sha }}
+     # - name: Push Docker Image
+       # run: docker push ${{ secrets.JF_URL }}/docker-local/spring-petclinic:${{ github.sha }}
