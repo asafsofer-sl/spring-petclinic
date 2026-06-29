@@ -5,6 +5,11 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+
+    env:
+      JFROG_CLI_BUILD_NAME: jfrog-docker-build-example
+      JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
+      
     steps:
       # 1. Fetch code from GitHub
       - name: Checkout Repository
